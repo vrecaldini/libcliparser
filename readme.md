@@ -31,7 +31,8 @@ That's it.
     #include <libcliparser/cliparser.h>  // this contains the concept cliparser::CliParsableArgument and the class cliparser::CliParser, which represents the core of the library
     #include <libcliparser/exceptions.h>  // optional. Include this if you want to handle the exceptions depending on their type
     ```
-
+    And include the root folder of this repository to your include-directories option (`include_directories` in `cmake` and `-I` for `g++` and `clang`).
+    
 - Secondly, you just have to create a `cliparser::CliParser` object. This may sound hard, but it is super easy (barely an inconvenience): just pass the name of your program and the description to the constructor. For example:
 
     ```c++
