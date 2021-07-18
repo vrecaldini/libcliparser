@@ -398,7 +398,7 @@ namespace cliparser {
         };
 
         /**
-         * @brief get the iterator to the option whose key is opt from the option_dictionary (aka std::unordered_map<std::string, OptionBase*>). If opt is not a key of the dictionary, throw NoSuchOptionException.
+         * @brief get the iterator of the option_dictionary (aka std::unordered_map<std::string, OptionBase*>) to the option whose key is opt. If opt is not a key of the dictionary, throw NoSuchOptionException.
          * 
          * @param opt the option key
          * @return const_option_iterator the const iterator to the option
@@ -410,9 +410,10 @@ namespace cliparser {
         }
 
         /**
-         * @brief get the iterator to the option whose key is opt from the option_dictionary (aka std::unordered_map<std::string, OptionBase*>). If opt is not a key of the dictionary, throw NoSuchOptionException.
+         * @brief get the iterator of the option_dictionary (aka std::unordered_map<std::string, OptionBase*>) to the option whose key is opt. If opt is not a key of the dictionary, throw NoSuchOptionException.
          * 
          * non-const overload
+         * 
          * @param opt the option key
          * @return option_iterator the const iterator to the option
          */
