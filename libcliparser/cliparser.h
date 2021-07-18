@@ -144,7 +144,7 @@ namespace cliparser {
          */
         template <CliParsableArgument Argument>
         [[nodiscard]] typename std::decay<Argument>::type getOption(const std::string& opt) const {
-            const_option_iterator it = _getOption(opt);
+            const_option_iterator it = _getOptionIterator(opt);
 
             if (!it->second->good()) throw BadOptionAccessException(opt);
             if (it->second->type() != typeid(Argument)) throw BadOptionCastException(opt);
@@ -171,7 +171,7 @@ namespace cliparser {
          * @return false otherwise
          */
         [[nodiscard]] bool isOptionOptional(const std::string& opt) const {
-            return _getOption(opt)->second->isOptional();
+            return _getOptionIterator(opt)->second->isOptional();
         }
 
         /**
@@ -183,7 +183,7 @@ namespace cliparser {
          * @return false otherwise
          */
         [[nodiscard]] bool isOptionSetByUser(const std::string& opt) const {
-            return _getOption(opt)->second->isSetByUser();
+            return _getOptionIterator(opt)->second->isSetByUser();
         }
 
         /**
@@ -398,16 +398,31 @@ namespace cliparser {
         };
 
         /**
-         * @brief get the option whose key is opt from the option_dictionary (aka std::unordered_map<std::string, OptionBase*>). If opt is not a key of the dictionary, throw NoSuchOptionException.
+         * @brief get the iterator to the option whose key is opt from the option_dictionary (aka std::unordered_map<std::string, OptionBase*>). If opt is not a key of the dictionary, throw NoSuchOptionException.
          * 
          * @param opt the option key
          * @return const_option_iterator the const iterator to the option
          */
-        const_option_iterator _getOption(const std::string& opt) const {
+        const_option_iterator _getOptionIterator(const std::string& opt) const {
             const_option_iterator it = cliOptions.find(opt);
             if (it == cliOptions.end()) throw NoSuchOptionException(opt);
             return it;
         }
+
+        /**
+         * @brief get the iterator to the option whose key is opt from the option_dictionary (aka std::unordered_map<std::string, OptionBase*>). If opt is not a key of the dictionary, throw NoSuchOptionException.
+         * 
+         * non-const overload
+         * @param opt the option key
+         * @return option_iterator the const iterator to the option
+         */
+        option_iterator _getOptionIterator(const std::string& opt) {
+            option_iterator it = cliOptions.find(opt);
+            if (it == cliOptions.end()) throw NoSuchOptionException(opt);
+            return it;
+        }
+
+
 
         std::string appName;  ///< name of the application
         std::string executablePath;  ///< path of the executable file
