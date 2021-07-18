@@ -422,14 +422,21 @@ namespace cliparser {
             virtual bool isSetByUser() const final {return static_cast<bool>(info & SET_BY_USER);}
 
             /**
-             * @brief this function checks whether an option is a flag (i.e. bool result of info & FLAG). 
+             * @brief this function checks whether an option is a flag (i.e. bool result of info & (FLAG ^ OPTIONAL)). 
+             * 
+             * 
+             * Explanation: 
+             * FLAG ^ OPTIONAL removes OPTIONAL from FLAG
+             * info & (FLAG ^ OPTIONAL) considers only FLAGs and not OPTIONAL values 
+             * 
+             * NOTE that the XOR is fundamental since a simple info & FLAG would return true if info were OPTIONAL or OPTIONAL_SET_BY_USER, which is not the correct behaviour
              * 
              * NOTE: Virtual and final function. This function cannot be overriden.
              * 
              * @return true if this option is a flag
              * @return false otherwise
              */
-            virtual bool isFlag() const final {return static_cast<bool>(info & FLAG);}
+            virtual bool isFlag() const final {return static_cast<bool>(info & (FLAG ^ OPTIONAL));}
 
             /**
              * @brief Get the typeid of the option held by the Option class. This function is pointless in OptionBase and it is marked as a pure virtual function. It must be implemented by the derived classes/structs that need to instantiate objects.

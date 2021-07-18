@@ -60,7 +60,6 @@ namespace cliparser {
 
             }
             else {
-                
                 option_iterator it = cliOptions.find(argv[i++]);
 
                 if (it == cliOptions.end()) {
