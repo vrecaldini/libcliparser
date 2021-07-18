@@ -1,0 +1,13 @@
+*.so
+*.a
+*.o
+
+*.out
+
+*.lib
+*.dll
+*.exe
+
+build/
+bin/
+docs/
