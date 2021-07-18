@@ -8,6 +8,29 @@
 
 namespace cliparser {
 
+    void CliParser::_preliminaryCheckOptionForProblems(const std::string& opt) const {
+        if(hasOption(opt)) throw OptionRedefinitionError(opt);
+
+        if (std::string::size_type pos = opt.find_first_of("= "); pos != std::string::npos) throw BadOptionFormatError(opt);
+    }
+
+    CliParser& CliParser::flag(const std::string& opt, const std::string& description) {
+        if(hasOption(opt)) throw OptionRedefinitionError(opt);
+
+        cliOptions.insert_or_assign(opt, new Option<bool>(description, false, true));
+
+        return *this;
+    }
+
+    CliParser& CliParser::flag(const std::string& opt, std::string&& description) {
+        if(hasOption(opt)) throw OptionRedefinitionError(opt);
+
+        cliOptions.insert_or_assign(opt, new Option<bool>(std::move(description), false, true));
+
+        return *this;
+    }
+
+
     void CliParser::parse(int argc, char* argv[], bool ignoreUnknownOptions, bool suppressMissingRequiredOptionsError) { 
         if (argc == 0) return;  // handle corner case: argc == 0. If this is the case, do nothing
         executablePath = argv[0];
@@ -29,7 +52,11 @@ namespace cliparser {
                     
                 }
 
-                it->second->setArgFromInput(argv[i++]+pos+1);
+                if (it->second->isFlag()) {
+                    // handle error: flags cannot be set explicitly
+                    throw std::invalid_argument("\033[1;31merror: invalid input\033[0m. Attempted to assign a value to a flag with '='");
+                }
+                else it->second->setArgFromInput(argv[i++]+pos+1);
 
             }
             else {
@@ -42,7 +69,17 @@ namespace cliparser {
                     continue;
                 }
 
-                it->second->setArgFromInput(argv[i++]);  
+                if (it->second->isFlag()) {  
+                    // flags must be handled differently from regular options
+                    static_cast<Option<bool>*>(it->second)->arg = true;  // flags do not consume additional arguments and simply set the value to true
+                    /*
+                        the option is still a flag, but its OptionBase::OPTION_INFO must change from FLAG to FLAG_OVERRIDEN_BY_USER 
+                        Here, info is set directly to FLAG_OVERRIDEN_BY_USER, but we could have obtained the same result by using it->second->info |= SET_BY_USER
+                        (remember: FLAG_OVERRIDEN_BY_USER = FLAG | SET_BY_USER)
+                    */
+                    it->second->info = OptionBase::FLAG_OVERRIDEN_BY_USER;  
+                }
+                else it->second->setArgFromInput(argv[i++]);  
 
             }
         }
@@ -70,7 +107,7 @@ namespace cliparser {
         return res;
     }
 
-    std::string CliParser::help(bool full, bool includeExecutablePath) const {
+    std::string CliParser::help(bool full, bool includeExecutablePath, bool includeVersion) const {
         // define some constant strings that will be used to form the help string
         std::string helpStr = appName;
         std::string optionHelpStr = "";
@@ -78,12 +115,14 @@ namespace cliparser {
             if (item.second->isOptional()) helpStr += " [" + item.first + "]";
             else helpStr += " " + item.first;
 
-            if (full) optionHelpStr += item.first + "\t\t" + item.second->descr + "\n";
+            if (full) optionHelpStr += item.first + "\t\t\t" + item.second->descr + "\n";
         }
-        helpStr += "\n\n";
+        helpStr += "\n";
+        // add the version if includeVersion is true
+        if (includeVersion) helpStr += "\nversion: " + ver + "\n";
         // add the executablePath if it exists and includeExecutablePath is true
-        if (includeExecutablePath && executablePath.size() != 0) helpStr += "installed at: " + executablePath + "\n\n";
-        
+        if (includeExecutablePath && executablePath.size() != 0) helpStr += "\ninstalled at: " + executablePath + "\n";
+        helpStr += "\n";
         /*
         use std::move(optionHelpStr) when calling operator+
         Indeed, we do not have to create a "deep" copy of the string 

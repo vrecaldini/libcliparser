@@ -18,7 +18,8 @@ int main (int argc, char* argv[]) {
         .option<bool>("-b", "bool")
         .option("--flag", "an optional flag", false)  
         .option("-q", "optional float", 3.22f)
-        .option<std::string>("-f", "file");
+        .option<std::string>("-f", "file")
+        .flag("--help", "print help and ignore everything else");
 
     
     // some tests with assert; if compiled with -DNDEBUG, these will do nothing
@@ -30,6 +31,8 @@ int main (int argc, char* argv[]) {
     assert(parser.isOptionOptional("-q") == true);
     assert(parser.getOption<float>("-q") == 3.22f);
     assert(parser.isOptionOptional("-f") == false);
+    assert(parser.isOptionFlag("--help"));
+    assert(parser.isOptionSetByUser("--help") == false);
 
     std::vector<std::string> optionVec = parser.getAllPossibleOptions();
     std::cout << "options: ";
@@ -156,8 +159,14 @@ int main (int argc, char* argv[]) {
         parser.parse(argc, argv);  
     } 
     catch (const std::exception& e) { // this catches all the exceptions thrown by parse
-        std::cerr << e.what() << std::endl;
-        std::exit(-1);
+        if (parser.getOption<bool>("--help")) {
+            std::cout << parser.help(true, false, true) << std::endl;
+            return 0;
+        }
+        else {
+            std::cerr << e.what() << std::endl;
+            std::exit(-1);
+        }
     }
     // we could have always used:
     // catch (const cliparser::NoSuchOptionException& e) {
@@ -181,6 +190,11 @@ int main (int argc, char* argv[]) {
         and if you have either let parse check whether there are any missing required options, then you may skip the try blocks at your own risk.
     */
 
+    if (parser.getOption<bool>("--help")) {
+        std::cout << "The CLI input was parsed successfully. Since --help was received, everyting else will be ignored.\n"
+            << parser.help(true, false, true) << std::endl;
+        return 0;
+    }
     int n = parser.getOption<int>("-n");
     double d = parser.getOption<double>("-d");
     bool b = parser.getOption<bool>("-b"), flag = parser.getOption<bool>("--flag");

@@ -22,7 +22,8 @@ int main (int argc, char* argv[]) {
     // add the options
     parser
         .option<std::string>("-p", "path")
-        .option("-n", "times. Default value: 1", 1);
+        .option("-n", "times. Default value: 1", 1)
+        .flag("--ignore-n", "ignore the -n flag and print the result 3 times.");
     
     // parse the input
     try {
@@ -30,13 +31,17 @@ int main (int argc, char* argv[]) {
     } 
     catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
-        std::cout << std::endl << parser.help(true) << std::endl;
+        std::cout << std::endl << parser.help(true, false, true) << std::endl;
         std::exit(-1);
     }
 
     // get the options
     std::string p = parser.getOption<std::string>("-p");
     int n = parser.getOption<int>("-n");
+    if (parser.getOption<bool>("--ignore-n")) {
+        std::cout << "--ignore-n received. Setting n = 3\n";
+        n = 3;
+    }
 
     // additional step: add eventual constraits to your options
     if (n < 1) {
