@@ -11,7 +11,6 @@ This is a simple CLI parsing library for C++. Everything is defined under the `n
   - [Introduction](#introduction)
   - [Building libcliparser](#building-libcliparser)
     - [Building the docs](#building-the-docs)
-  - [Additional Notes](#additional-notes)
 
 ---
 
@@ -52,6 +51,27 @@ That's it.
     You may forgo the use of a `try` block around this part since it is complitely in your own hand, but if you want to feel safer, you could add a `try` block around this section and then catch the `cliparser::BadOptionFormatError` and the `cliparser::OptionRedefinitionError` exceptions while writing the first draft of your code and then either remove it or wrap it around `#ifndef NDEBUG` and `#endif` compiler directives. Passing the `-DNDEBUG` definition to the compiler should do the trick.
 
     - As you have probably noticed, the two exceptions mentioned earlier are just for the developers' sake. Indeed, they are defined only to prevent the use of the character `'='` in your options and to avoid the accidental redefinition of an option. A careful eye could probably catch both problems, but they may be a nice addition if this sequence of calls to `cliparser::CliParser::option` is done in an automated way (e.g. from an automatic tool of your own design, or from a datastructure (like an hash table)).
+
+    Flags can also be added to the parser, and they can be chained as well:
+    ```c++
+    parser
+        .flag("-h", "print help and ignore everyting else")
+        .flag("-v", "include version in help");
+    ```
+
+    > **But what are *flags*?** 
+    > 
+    > Flags are special optional options of type `bool`, and their default value is `false`. Furthermore, they cannot be set explicitly with a value, but can only be passed to command line. 
+    > 
+    > For example, for a program *progr* that accepts `-h`, `progr -h` is valid. 
+    > However, `progr -h=true` **is NOT valid**.
+    >
+    > Since flags are optional options, calls to `cliparser::CliParser::getOption<bool>` with *valid* flags do not throw exceptions since all the requirements are satisfied: 
+    > - opt is a valid flag (make sure it is)
+    > - opt has a value (if the flag has not been passed to the program, it is set to `false`
+    > - opt is of type `bool`
+    
+    <br />
 
 - 
     Now that you have defined the options your application should use, you may want to parse the arguments received from the command line. In most cases, it is recommended that this part be wrapped by a `try` block. 
@@ -142,9 +162,3 @@ To build the documentation for `libcliparser`, you need doxygen. Then `cd` to `l
         doxygen
 
 Done.
-
----
-
-## Additional Notes
-
-Right now, flags (such as `-h`) and aliases are not supported.
