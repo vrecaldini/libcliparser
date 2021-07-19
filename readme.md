@@ -67,8 +67,8 @@ That's it.
     > However, `progr -h=true` **is NOT valid**.
     >
     > Since flags are optional options, calls to `cliparser::CliParser::getOption<bool>` with *valid* flags do not throw exceptions since all the requirements are satisfied: 
-    > - opt is a valid flag (make sure it is)
-    > - opt has a value (if the flag has not been passed to the program, it is set to `false`
+    > - opt is a valid flag (make sure it is);
+    > - opt has a value (if the flag has not been passed to the program, it is set to `false`);
     > - opt is of type `bool`
     
     <br />
