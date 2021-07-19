@@ -61,7 +61,7 @@ That's it.
 
     > **But what are *flags*?** 
     > 
-    > Flags are special optional options of type `bool`, and their default value is `false`. Furthermore, they cannot be set explicitly with a value, but can only be passed to command line. 
+    > Flags are special optional options of type `bool`, and their default value is `false`. Furthermore, they cannot be set explicitly with a value, and they can only be passed to command line. 
     > 
     > For example, for a program *progr* that accepts `-h`, `progr -h` is valid. 
     > However, `progr -h=true` **is NOT valid**.
